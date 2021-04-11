@@ -7,13 +7,15 @@ Config.Accounts = {
 	money = _U('account_money')
 }
 
+Config.FirstSpawnCoords = {x = -269.4, y = -955.3, z = 31.2, heading = 205.8} -- first spawn coordinates
+
 Config.StartingAccountMoney = {bank = 50000}
 
 Config.EnableSocietyPayouts = false -- pay from the society account that the player is employed at? Requirement: esx_society
 Config.DisableWantedLevel   = true
 Config.EnableHud            = false -- enable the default hud? Display current job and accounts (black, bank & cash)
 Config.EnablePvP            = true -- enable pvp?
-Config.MaxWeight            = 24000   -- the max inventory weight without backpack(this is in grams, not kg!)
+Config.MaxWeight            = 30000   -- the max inventory weight without backpack(this is in grams, not kg!)
 
 Config.PaycheckInterval     = 60 * 60000 -- how often to recieve pay checks in milliseconds
 
@@ -25,5 +27,3 @@ Config.PrimaryIdentifier	= "steam" -- Options: steam, license (social club), fiv
 -- then this will make them invisible until the actual outfit/model has loaded, this looks better than
 -- loading another model then changing it immediately after
 Config.DefaultPlayerModel	= `mp_m_freemode_01` 
-
-Config.DefaultPickupModel = `prop_money_bag_01`

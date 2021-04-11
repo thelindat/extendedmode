@@ -5,8 +5,6 @@ ESX.Items = {}
 ESX.ServerCallbacks = {}
 ESX.TimeoutCount = -1
 ESX.CancelledTimeouts = {}
-ESX.Pickups = {}
-ESX.PickupId = 0
 ESX.Jobs = {}
 ESX.RegisteredCommands = {}
 

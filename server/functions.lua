@@ -167,12 +167,11 @@ ESX.SavePlayer = function(xPlayer, cb)
 	if ExM.DatabaseType == "es+esx" then
 		-- Nothing yet ;)
 	elseif ExM.DatabaseType == "newesx" then
-		MySQL.Async.execute('UPDATE users SET accounts = @accounts, job = @job, job_grade = @job_grade, `group` = @group, loadout = @loadout, position = @position, inventory = @inventory WHERE identifier = @identifier', {
+		MySQL.Async.execute('UPDATE users SET accounts = @accounts, job = @job, job_grade = @job_grade, `group` = @group, position = @position, inventory = @inventory WHERE identifier = @identifier', {
 			['@accounts'] = json.encode(xPlayer.getAccounts(true)),
 			['@job'] = xPlayer.job.name,
 			['@job_grade'] = xPlayer.job.grade,
 			['@group'] = xPlayer.getGroup(),
-			['@loadout'] = json.encode(xPlayer.getLoadout(true)),
 			['@position'] = json.encode(xPlayer.getCoords()),
 			['@identifier'] = xPlayer.getIdentifier(),
 			['@inventory'] = json.encode(xPlayer.getInventory(true))
@@ -260,32 +259,6 @@ ESX.GetItemLabel = function(item)
 	if ESX.Items[item] then
 		return ESX.Items[item].label
 	end
-end
-
-ESX.CreatePickup = function(type, name, count, label, playerId, components, tintIndex)
-    local pickupId = (ESX.PickupId == 65635 and 0 or ESX.PickupId + 1)
-    local xPlayer = ESX.GetPlayerFromId(playerId)
-    local pedCoords
-    
-    if ExM.IsInfinity then
-        pedCoords = GetEntityCoords(GetPlayerPed(playerId))
-    end
-
-    ESX.Pickups[pickupId] = {
-        type  = type,
-        name  = name,
-        count = count,
-        label = label,
-        coords = xPlayer.getCoords(),
-    }
-
-    if type == 'item_weapon' then
-        ESX.Pickups[pickupId].components = components
-        ESX.Pickups[pickupId].tintIndex = tintIndex
-    end
-
-    TriggerClientEvent('esx:createPickup', -1, pickupId, label, playerId, type, name, components, tintIndex, ExM.IsInfinity, pedCoords)
-    ESX.PickupId = pickupId
 end
 
 ESX.DoesJobExist = function(job, grade)

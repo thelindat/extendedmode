@@ -116,6 +116,28 @@ Config.Weapons = {
 			{name = 'suppressor', label = _U('component_suppressor'), hash = `COMPONENT_AT_PI_SUPP`}
 		}
 	},
+	
+	{
+		name = 'WEAPON_CERAMICPISTOL',
+		label = _U('weapon_ceramicpistol'),
+		ammo = {label = _U('ammo_rounds'), hash = `AMMO_PISTOL`},
+		tints = Config.DefaultWeaponTints,
+		components = {
+			{name = 'clip_default', label = _U('component_clip_default'), hash = `COMPONENT_CERAMICPISTOL_CLIP_01`},
+			{name = 'clip_extended', label = _U('component_clip_extended'), hash = `COMPONENT_CERAMICPISTOL_CLIP_02`},
+			{name = 'suppressor', label = _U('component_suppressor'), hash = `COMPONENT_CERAMICPISTOL_SUPP`}
+		}
+	},
+
+	{
+		name = 'WEAPON_NAVYREVOLVER',
+		label = _U('weapon_navyrevolver'),
+		ammo = {label = _U('ammo_rounds'), hash = `AMMO_PISTOL`},
+		tints = Config.DefaultWeaponTints,
+		components = {
+			{name = 'clip_default', label = _U('component_clip_default'), hash = `COMPONENT_NAVYREVOLVER_CLIP_01`}
+		}
+	},
 
 	{name = 'WEAPON_REVOLVER', label = _U('weapon_revolver'), tints = Config.DefaultWeaponTints, components = {}, ammo = {label = _U('ammo_rounds'), hash = `AMMO_PISTOL`}},
 	{name = 'WEAPON_MARKSMANPISTOL', label = _U('weapon_marksmanpistol'), tints = Config.DefaultWeaponTints, components = {}, ammo = {label = _U('ammo_rounds'), hash = `AMMO_PISTOL`}},
@@ -571,6 +593,16 @@ Config.Weapons = {
 		}
 	},
 
+
+	{	
+		name = 'WEAPON_COMBATSHOTGUN',
+		label = _U('weapon_combatshotgun'),
+		components = {
+			{ name = 'clip', label = _U('component_clip_default'), hash = `COMPONENT_COMBATSHOTGUN_CLIP_01` },
+			
+		}
+	},
+
 	{	
 		name = 'WEAPON_ASSAULTRIFLE_MK2',
 		label = _U('weapon_assaultrifle_mk2'),
@@ -662,6 +694,17 @@ Config.Weapons = {
 			{ name = 'skin_geometric', label = _U('component_skin_geometric'), hash = `COMPONENT_CARBINERIFLE_MK2_CAMO_09` },
 			{ name = 'skin_boom', label = _U('component_skin_boom'), hash = `COMPONENT_CARBINERIFLE_MK2_CAMO_10` },
 			{ name = 'skin_patriotic', label = _U('component_skin_patriotic'), hash = `COMPONENT_CARBINERIFLE_MK2_CAMO_IND_01` },
+		}
+	},
+
+	{	
+		name = 'WEAPON_MILITARYRIFLE',
+		label = _U('weapon_militaryrifle'),
+		components = {
+			{ name = 'clip', label = _U('component_clip_default'), hash = `COMPONENT_MILITARYRIFLE_CLIP_01` },
+			{ name = 'clip_extended', label = _U('component_clip_extended'), hash = `COMPONENT_MILITARYRIFLE_CLIP_02` },
+
+			{ name = 'scope', label = _U('component_scope'), hash = `COMPONENT_MILITARYRIFLE_SIGHT_01` },
 		}
 	},
 

@@ -1,3 +1,11 @@
+## Updated for support with [my inventory](https://github.com/thelindat/linden_inventory/)
+* Removed events and functions that are obsolete, related to inventory and loadouts
+* Added modifications necessary to work with my inventory resource
+* Merged in the dev branch from the main repository
+* Added a few small changes of my own
+
+
+
 # extendedmode
 extendedmode is a community edition fork of es_extended (better known as ESX) and will be maintained by various trusted members of the FiveM community.
 

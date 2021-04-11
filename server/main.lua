@@ -143,10 +143,6 @@ function loadESXPlayer(identifier, playerId)
 			userData.inventory = json.decode(result[1].inventory)
 		end
 
-		table.sort(userData.inventory, function(a, b)
-			return a.label < b.label
-		end)
-
 		-- Group
 		if result[1].group then
 			userData.group = result[1].group

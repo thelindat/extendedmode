@@ -143,8 +143,8 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, weight, job
 		end
 	end
 
-	self.getInventory = function()
-		return exports['linden_inventory']:getPlayerInventory(self)
+	self.getInventory = function(minimal)
+		return exports['linden_inventory']:getPlayerInventory(self, minimal)
 	end
 
 	self.getJob = function()
@@ -197,6 +197,10 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, weight, job
 				self.triggerEvent('esx:setAccountMoney', account)
 			end
 		end
+	end
+
+	self.getPlayerSlot = function(slot)
+		return exports['linden_inventory']:getPlayerSlot(self, slot)
 	end
 
 	self.getInventoryItem = function(name, metadata)

@@ -6,7 +6,7 @@
 
 
 
-# extendedmode
+# [extendedmode](https://github.com/extendedmode/extendedmode)
 extendedmode is a community edition fork of es_extended (better known as ESX) and will be maintained by various trusted members of the FiveM community.
 
 ## Primary goals for this project

@@ -154,7 +154,7 @@ function loadESXPlayer(identifier, playerId)
 		if result[1].position and result[1].position ~= '' then
 			userData.coords = json.decode(result[1].position)
 		else
-			print('[ExtendedMode] [^3WARNING^7] Column "position" in "users" table is missing required default value. Using backup coords, fix your database.')
+			--print('[ExtendedMode] [^3WARNING^7] Column "position" in "users" table is missing required default value. Using backup coords, fix your database.')
 			userData.coords = Config.FirstSpawnCoords
 		end
 

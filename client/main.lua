@@ -72,12 +72,6 @@ AddEventHandler('esx:onPlayerSpawn', function() isDead = false end)
 AddEventHandler('esx:onPlayerDeath', function() isDead = true end)
 AddEventHandler('skinchanger:loadDefaultModel', function() end)
 
-AddEventHandler('skinchanger:modelLoaded', function()
-	while not ESX.PlayerLoaded do
-		Wait(100)
-	end
-end)
-
 RegisterNetEvent('esx:setAccountMoney')
 AddEventHandler('esx:setAccountMoney', function(account)
 	for k,v in ipairs(ESX.PlayerData.accounts) do
@@ -210,30 +204,22 @@ end
 
 function StartUpdating()
 	CreateThread(function()
-		while not isSpawned do
-			Wait(1000)
-		end
 		if not ESX.PlayerData then return end
 		local previousCoords = vector3(ESX.PlayerData.coords.x, ESX.PlayerData.coords.y, ESX.PlayerData.coords.z)
 		local playerHeading = ESX.PlayerData.heading
 		local formattedCoords = {x = ESX.Math.Round(previousCoords.x, 1), y = ESX.Math.Round(previousCoords.y, 1), z = ESX.Math.Round(previousCoords.z, 1), heading = playerHeading}
 
-		while true do
-			if isSpawned then
-				local playerPed = PlayerPedId()
-				local playerCoords = GetEntityCoords(playerPed)
-				local distance = #(playerCoords - previousCoords)
+		while isSpawned do
+			local playerPed = PlayerPedId()
+			local playerCoords = GetEntityCoords(playerPed)
+			local distance = #(playerCoords - previousCoords)
 
-				if distance > 10 then
-					previousCoords = playerCoords
-					playerHeading = ESX.Math.Round(GetEntityHeading(playerPed), 1)
-					formattedCoords = {x = ESX.Math.Round(playerCoords.x, 1), y = ESX.Math.Round(playerCoords.y, 1), z = ESX.Math.Round(playerCoords.z, 1), heading = playerHeading}
-					TriggerServerEvent('esx:updateCoords', formattedCoords)
-					if distance > 1 then
-						TriggerServerEvent('esx:updateCoords', formattedCoords)
-					end
-				end
-			else return end
+			if distance >= 5 then
+				previousCoords = playerCoords
+				playerHeading = ESX.Math.Round(GetEntityHeading(playerPed), 1)
+				formattedCoords = {x = ESX.Math.Round(playerCoords.x, 1), y = ESX.Math.Round(playerCoords.y, 1), z = ESX.Math.Round(playerCoords.z, 1), heading = playerHeading}
+				TriggerServerEvent('esx:updateCoords', formattedCoords)
+			end
 			Wait(1000)
 		end
 	end)

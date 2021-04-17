@@ -1,8 +1,13 @@
+## Updated for better kashacters compatibility and integration
+* [Download here](https://github.com/thelindat/esx_kashacter)  
+![image](https://user-images.githubusercontent.com/65407488/115118377-3b3bc780-9fe6-11eb-9ebc-55ac7547cac8.png)
+
 ## Updated for support with [my inventory](https://github.com/thelindat/linden_inventory/)
 * Removed events and functions that are obsolete, related to inventory and loadouts
 * Added modifications necessary to work with my inventory resource
 * Merged in the dev branch from the main repository
 * Added a few small changes of my own
+
 
 
 

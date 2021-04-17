@@ -1,5 +1,7 @@
 CREATE TABLE `users` (
-	`identifier` VARCHAR(60) NOT NULL,
+	`identifier` INT(11) NOT NULL AUTO_INCREMENT,
+	`discord` VARCHAR(60) NOT NULL,
+	`slot` INT(11) NOT NULL,
 	`license` VARCHAR(60) DEFAULT NULL,
 	`accounts` LONGTEXT NULL DEFAULT NULL,
 	`group` VARCHAR(50) NULL DEFAULT 'user',
@@ -7,7 +9,7 @@ CREATE TABLE `users` (
 	`job` VARCHAR(20) NULL DEFAULT 'unemployed',
 	`job_grade` INT NULL DEFAULT 0,
 	`position` VARCHAR(255) NULL DEFAULT NULL,
-
+	ADD INDEX IF NOT EXISTS (`discord`),
 	PRIMARY KEY (`identifier`)
 );
 

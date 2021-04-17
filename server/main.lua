@@ -1,32 +1,33 @@
 RegisterNetEvent('esx:onPlayerJoined')
-AddEventHandler('esx:onPlayerJoined', function()
-	if not ESX.Players[source] then
-		onPlayerJoined(source)
+AddEventHandler('esx:onPlayerJoined', function(src, slot)
+	if not ESX.Players[src] then
+		onPlayerJoined(src, slot)
 	end
 end)
 
-function onPlayerJoined(playerId)
-	local identifier
+function onPlayerJoined(playerId, slot)
+	local discord
 	local license
 	
 	for k,v in ipairs(GetPlayerIdentifiers(playerId)) do
 		if string.match(v, Config.PrimaryIdentifier) then
-			identifier = v
+			discord = v
 		end
 		if string.match(v, 'license:') then
 			license = v
 		end
 	end
 
-	if identifier then
-		if ESX.GetPlayerFromIdentifier(identifier) then
+	if discord then
+		if ESX.GetPlayerFromIdentifier(discord) then
 			DropPlayer(playerId, ('there was an error loading your character!\nError code: identifier-active-ingame\n\nThis error is caused by a player on this server who has the same identifier as you have. Make sure you are not playing on the same Rockstar account.\n\nYour Rockstar identifier: %s'):format(identifier))
 		else
-			MySQL.Async.fetchScalar('SELECT 1 FROM users WHERE identifier = @identifier', {
-				['@identifier'] = identifier
+			exports.ghmattimysql:scalar('SELECT 1 FROM users WHERE discord = @discord AND slot = @slot', {
+				['@discord'] = discord,
+				['@slot'] = slot
 			}, function(result)
 				if result then
-					loadESXPlayer(identifier, playerId)
+					loadESXPlayer(slot, playerId, discord)
 				else
 					local accounts = {}
 
@@ -34,12 +35,13 @@ function onPlayerJoined(playerId)
 						accounts[account] = money
 					end
 
-					MySQL.Async.execute('INSERT INTO users (accounts, identifier, license) VALUES (@accounts, @identifier, @license)', {
+					exports.ghmattimysql:execute('INSERT INTO users (accounts, discord, license, slot) VALUES (@accounts, @discord, @license, @slot)', {
 						['@accounts'] = json.encode(accounts),
-						['@identifier'] = identifier,
-						['@license'] = license,						
+						['@discord'] = discord,
+						['@license'] = license,
+						['@slot'] = slot
 					}, function(rowsChanged)
-						loadESXPlayer(identifier, playerId)
+						loadESXPlayer(slot, playerId, discord, true)
 					end)
 				end
 			end)
@@ -51,12 +53,12 @@ end
 
 AddEventHandler('playerConnecting', function(name, setCallback, deferrals)
 	deferrals.defer()
-	local playerId, identifier = source
+	local playerId, discord = source
 	Wait(100)
 
 	for k,v in ipairs(GetPlayerIdentifiers(playerId)) do
 		if string.match(v, Config.PrimaryIdentifier) then
-			identifier = v
+			discord = v
 			break
 		end
 	end
@@ -68,8 +70,8 @@ AddEventHandler('playerConnecting', function(name, setCallback, deferrals)
 		end
 	end
 
-	if identifier then
-		if ESX.GetPlayerFromIdentifier(identifier) then
+	if discord then
+		if ESX.GetPlayerFromIdentifier(discord) then
 			deferrals.done(('There was an error loading your character!\nError code: identifier-active\n\nThis error is caused by a player on this server who has the same identifier as you have. Make sure you are not playing on the same Rockstar account.\n\nYour Rockstar identifier: %s'):format(identifier))
 		else
 			deferrals.done()
@@ -80,8 +82,7 @@ AddEventHandler('playerConnecting', function(name, setCallback, deferrals)
 end)
 
 
-function loadESXPlayer(identifier, playerId)
-	-- TODO: Implement other loading methods
+function loadESXPlayer(slot, playerId, discord, isNew)
 	
 	local userData = {
 		accounts = {},
@@ -91,9 +92,12 @@ function loadESXPlayer(identifier, playerId)
 		weight = 0
 	}
 
-	MySQL.Async.fetchAll('SELECT accounts, job, job_grade, `group`, position, inventory FROM users WHERE identifier = @identifier', {
-		['@identifier'] = identifier
+	exports.ghmattimysql:execute('SELECT identifier, accounts, job, job_grade, `group`, position, inventory, status FROM users WHERE slot = @slot AND discord = @discord', {
+		['@slot'] = slot,
+		['@discord'] = discord
 	}, function(result)
+		local identifier = result[1].identifier
+
 		local job, grade, jobObject, gradeObject = result[1].job, tostring(result[1].job_grade)
 		local foundAccounts, foundItems = {}, {}
 
@@ -158,24 +162,53 @@ function loadESXPlayer(identifier, playerId)
 			userData.coords = Config.FirstSpawnCoords
 		end
 
+
 		-- Create Extended Player Object
-		local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.group, userData.accounts, userData.weight, userData.job, userData.playerName, userData.coords)
+		local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.group, userData.accounts, userData.weight, userData.job, userData.playerName, userData.coords, discord)
 		ESX.Players[playerId] = xPlayer
 		TriggerEvent('linden_inventory:setPlayerInventory', xPlayer, userData.inventory)
-		TriggerEvent('esx:playerLoaded', playerId, xPlayer)
-
-		xPlayer.triggerEvent('esx:playerLoaded', {
+		TriggerEvent('esx:playerLoaded', playerId, xPlayer, isNew)
+		xPlayer.triggerEvent('esx:loadPlayerData', {
 			accounts = xPlayer.getAccounts(),
 			coords = xPlayer.getCoords(),
-			identifier = xPlayer.getIdentifier(),
+			identifier = xPlayer.identifier,
 			inventory = xPlayer.getInventory(),
+			discord = xPlayer.discord,
 			job = xPlayer.getJob(),
 			money = xPlayer.getMoney()
-		})
-
+		}, isNew)
+		local status = {}
+		if result[1].status then
+			status = json.decode(result[1].status)
+		end
+		xPlayer.set('status', status)
+		TriggerClientEvent('esx_status:load', playerId, status)
 		xPlayer.triggerEvent('esx:registerSuggestions', ESX.RegisteredCommands)
 	end)
 end
+
+AddEventHandler('chatMessage', function(playerId, author, message)
+	if message:sub(1, 1) == '/' and playerId > 0 then
+		CancelEvent()
+		local commandName = message:sub(1):gmatch("%w+")()
+		TriggerClientEvent('chat:addMessage', playerId, {args = {'^1SYSTEM', _U('commanderror_invalidcommand', commandName)}})
+	end
+end)
+
+RegisterCommand('relog', function(source, args, raw)
+	TriggerEvent('esx:playerLogout', source)
+end, false)
+
+AddEventHandler('esx:playerLogout', function(source)
+	local xPlayer = ESX.GetPlayerFromId(source)
+	if xPlayer then
+		TriggerEvent('esx:playerDropped', source, reason)
+		ESX.SavePlayer(xPlayer, function()
+			ESX.Players[source] = nil
+		end)
+	end
+	TriggerClientEvent("esx:onPlayerLogout",source)
+  end)
 
 AddEventHandler('playerDropped', function(reason)
 	local playerId = source
@@ -197,6 +230,18 @@ AddEventHandler('esx:updateCoords', function(coords)
 	if xPlayer then
 		xPlayer.updateCoords(coords)
 	end
+end)
+
+RegisterNetEvent('esx:updateWeaponAmmo')
+AddEventHandler('esx:updateWeaponAmmo', function()
+	local playerId = source
+	--Trigger automated ban
+end)
+
+RegisterNetEvent('esx:giveInventoryItem')
+AddEventHandler('esx:giveInventoryItem', function()
+	local playerId = source
+	--Trigger automated ban
 end)
 
 RegisterNetEvent('esx:useItem')
@@ -247,31 +292,4 @@ ESX.RegisterServerCallback('esx:getPlayerNames', function(source, cb, players)
 	end
 
 	cb(players)
-end)
-
--- Add support for EssentialMode >6.4.x
-AddEventHandler("es:setMoney", function(user, value) ESX.GetPlayerFromId(user).setMoney(value, true) end)
-AddEventHandler("es:addMoney", function(user, value) ESX.GetPlayerFromId(user).addMoney(value, true) end)
-AddEventHandler("es:removeMoney", function(user, value) ESX.GetPlayerFromId(user).removeMoney(value, true) end)
-AddEventHandler("es:set", function(user, key, value) ESX.GetPlayerFromId(user).set(key, value, true) end)
-
-AddEventHandler("es_db:doesUserExist", function(identifier, cb)
-	cb(true)
-end)
-
-AddEventHandler('es_db:retrieveUser', function(identifier, cb, tries)
-	tries = tries or 0
-
-	if(tries < 500)then
-		tries = tries + 1
-		local player = ESX.GetPlayerFromIdentifier(identifier)
-
-		if player then
-			cb({permission_level = 0, money = player.getMoney(), bank = 0, identifier = player.identifier, license = player.get("license"), group = player.group, roles = ""}, false, true)
-		else
-			Citizen.SetTimeout(100, function()
-				TriggerEvent("es_db:retrieveUser", identifier, cb, tries)
-			end)
-		end
-	end
 end)

@@ -1,19 +1,20 @@
-function CreateExtendedPlayer(playerId, identifier, group, accounts, weight, job, name, coords)
+function CreateExtendedPlayer(playerId, identifier, group, accounts, weight, job, name, coords, discord)
 	local self = {}
 
 	self.accounts = accounts
+	self.inventory = {}
 	self.coords = coords
 	self.group = group
 	self.identifier = identifier
-	self.inventory = {}
 	self.job = job
 	self.name = name
 	self.playerId = playerId
 	self.source = playerId
 	self.variables = {}
 	self.weight = weight
+	self.discord = discord
 
-	ExecuteCommand(('add_principal identifier.%s group.%s'):format(self.identifier, self.group))
+	ExecuteCommand(('add_principal identifier.%s group.%s'):format(self.discord, self.group))
 
 	self.triggerEvent = function(eventName, ...)
 		TriggerClientEvent(eventName, self.source, ...)
@@ -75,25 +76,17 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, weight, job
 		return self.identifier
 	end
 
-	self.setGroup = function(newGroup, recursion)
-		if(not recursion)then
-			TriggerEvent("es:getPlayerFromId", self.source, function(user) user.set("group", newGroup) end)
-		end
-
-		ExecuteCommand(('remove_principal identifier.%s group.%s'):format(self.identifier, self.group))
+	self.setGroup = function(newGroup)
+		ExecuteCommand(('remove_principal identifier.%s group.%s'):format(self.discord, self.group))
 		self.group = newGroup
-		ExecuteCommand(('add_principal identifier.%s group.%s'):format(self.identifier, self.group))
+		ExecuteCommand(('add_principal identifier.%s group.%s'):format(self.discord, self.group))
 	end
 
 	self.getGroup = function()
 		return self.group
 	end
 
-	self.set = function(k, v, recursion)
-		if(not recursion)then
-			TriggerEvent("es:getPlayerFromId", self.source, function(user) if(user)then user.set(k, v) end end)
-		end
-
+	self.set = function(k, v)
 		self.variables[k] = v
 	end
 
@@ -258,7 +251,7 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, weight, job
 			TriggerEvent('esx:setJob', self.source, self.job, lastJob)
 			self.triggerEvent('esx:setJob', self.job)
 		else
-			print(('[ExtendedMode] [^3WARNING^7] Ignoring invalid .setJob() usage for "%s"'):format(self.identifier))
+			print(('[ExtendedMode] [^3WARNING^7] Ignoring invalid .setJob() usage for "%s"'):format(self.discord))
 		end
 	end
 

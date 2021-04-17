@@ -50,7 +50,6 @@ AddEventHandler('esx:loadPlayerData', function(playerData, new)
 		TriggerEvent('esx:onPlayerSpawn')
 		TriggerServerEvent('esx:onPlayerSpawn')
 		TriggerEvent('esx_ambulancejob:multicharacter')
-		TriggerEvent('chat:toggleChat', false)
 		if isNew then TriggerEvent('skinchanger:loadDefaultModel') else TriggerEvent('skinchanger:loadSkin') end
 		DoScreenFadeIn(500)
 		Citizen.Wait(1700)

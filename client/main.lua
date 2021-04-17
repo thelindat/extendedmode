@@ -1,23 +1,9 @@
-local isSpawned, isPaused, isDead, isFirstSpawn = false, false, false, true
+local isSpawned, isPaused, isDead = false, false, false
 
-CreateThread(function()
-	while true do
-		Wait(0)
-
-		if NetworkIsPlayerActive(PlayerId()) then
-			TriggerServerEvent('esx:onPlayerJoined')
-			break
-		end
-	end
-end)
-
-RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(playerData)
+RegisterNetEvent('esx:loadPlayerData')
+AddEventHandler('esx:loadPlayerData', function(playerData, new)
 	ESX.PlayerLoaded = true
 	ESX.PlayerData = playerData
-	
-	-- Removed some unnecessary statement here checking if you were Michael, it did nothing really.
-	-- Was also kind of broken because anyone who has a SP save no using Michael wouldn't even get it.
 
 	local playerPed = PlayerPedId()
 
@@ -51,14 +37,55 @@ AddEventHandler('esx:playerLoaded', function(playerData)
 		z = playerData.coords.z,
 		heading = playerData.coords.heading,
 		model = Config.DefaultPlayerModel,
-		skipFade = false
+		skipFade = true
 	}, function()
-		isSpawned = true
-		TriggerServerEvent('esx:onPlayerSpawn')
+		DoScreenFadeOut(500)
+		SetTimecycleModifier('default')
+		local pos = GetEntityCoords(PlayerPedId())
+		cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", pos.x,pos.y,pos.z+200, 300.00,0.00,0.00, 100.00, false, 0)
+		PointCamAtCoord(cam, pos.x,pos.y,pos.z+2)
+		SetCamActiveWithInterp(cam, cam2, 2200, true, true)
+		Citizen.Wait(500)
+		TriggerEvent('esx:playerLoaded', ESX.PlayerData)
 		TriggerEvent('esx:onPlayerSpawn')
+		TriggerServerEvent('esx:onPlayerSpawn')
+		TriggerEvent('esx_ambulancejob:multicharacter')
+		TriggerEvent('chat:toggleChat', false)
+		if isNew then TriggerEvent('skinchanger:loadDefaultModel') else TriggerEvent('skinchanger:loadSkin') end
+		DoScreenFadeIn(500)
+		Citizen.Wait(1700)
+		
+		PlaySoundFrontend(-1, "Zoom_Out", "DLC_HEIST_PLANNING_BOARD_SOUNDS", 1)
+		RenderScriptCams(false, true, 500, true, true)
+		PlaySoundFrontend(-1, "CAR_BIKE_WHOOSH", "MP_LOBBY_SOUNDS", 1)
+		FreezeEntityPosition(PlayerPedId(), false)
+		
+		Citizen.Wait(500)
+		
+		SetCamActive(cam, false)
+		DestroyCam(cam, true)
+		IsChoosing = false
+			
+		DisplayHud(true)
+		DisplayRadar(true)
+		ESX.UI.HUD.SetDisplay(1.0)
+	
 		StartUpdating()
 	end)
 end)
+
+RegisterNetEvent('esx:onPlayerLogout')
+AddEventHandler('esx:onPlayerLogout', function()
+	Logout()
+end)
+
+function Logout()
+	ESX.PlayerLoaded = false
+	ESX.PlayerData = nil
+	isSpawned = false
+	TriggerServerEvent("kashactersS:SetupCharacters")
+	TriggerEvent("kashactersC:SetupCharacters")
+end
 
 RegisterNetEvent('es:activateMoney')
 AddEventHandler('es:activateMoney', function(money)
@@ -68,9 +95,8 @@ end)
 RegisterNetEvent('esx:setMaxWeight')
 AddEventHandler('esx:setMaxWeight', function(newMaxWeight) ESX.PlayerData.maxWeight = newMaxWeight end)
 
-AddEventHandler('esx:onPlayerSpawn', function() isDead = false end)
+AddEventHandler('esx:onPlayerSpawn', function() isDead = false isSpawned = true end)
 AddEventHandler('esx:onPlayerDeath', function() isDead = true end)
-AddEventHandler('skinchanger:loadDefaultModel', function() end)
 
 RegisterNetEvent('esx:setAccountMoney')
 AddEventHandler('esx:setAccountMoney', function(account)
@@ -116,9 +142,10 @@ AddEventHandler('esx:spawnVehicle', function(vehicle)
 		local playerPed = PlayerPedId()
 		local playerCoords, playerHeading = GetEntityCoords(playerPed), GetEntityHeading(playerPed)
 
+
 		if IsPedInAnyVehicle(playerPed, true) then
 			local vehicle = GetVehiclePedIsIn(playerPed, false)
-			ESX.Game.DeleteVehicle(entity)
+			ESX.Game.DeleteVehicle(vehicle)
 		end
 
 		ESX.Game.SpawnVehicle(vehicle, playerCoords, playerHeading, function(vehicle)
@@ -204,7 +231,6 @@ end
 
 function StartUpdating()
 	CreateThread(function()
-		if not ESX.PlayerData then return end
 		local previousCoords = vector3(ESX.PlayerData.coords.x, ESX.PlayerData.coords.y, ESX.PlayerData.coords.z)
 		local playerHeading = ESX.PlayerData.heading
 		local formattedCoords = {x = ESX.Math.Round(previousCoords.x, 1), y = ESX.Math.Round(previousCoords.y, 1), z = ESX.Math.Round(previousCoords.z, 1), heading = playerHeading}

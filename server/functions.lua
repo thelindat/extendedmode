@@ -183,7 +183,7 @@ ESX.SavePlayers = function(finishedCB)
 	CreateThread(function()
 		local savedPlayers = 0
 		local playersToSave = #ESX.Players
-		local maxTimeout = 20000
+		local maxTimeout = 45000
 		local currentTimeout = 0
 	
 		-- Save Each player

@@ -246,12 +246,14 @@ end)
 
 RegisterNetEvent('esx:useItem')
 AddEventHandler('esx:useItem', function(source, itemName)
+	--[[ Shouldn't need this anymore
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local item = xPlayer.getInventoryItem(itemName)
 	if item.count > 0 then
 		if item.closeonuse then TriggerClientEvent('linden_inventory:closeInventory', source) end
 		ESX.UseItem(source, itemName)
 	end
+]]
 end)
 
 ESX.RegisterServerCallback('esx:getPlayerData', function(source, cb)

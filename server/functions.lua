@@ -183,7 +183,7 @@ ESX.SavePlayers = function(finishedCB)
 	CreateThread(function()
 		local savedPlayers = 0
 		local playersToSave = #ESX.Players
-		local maxTimeout = 20000
+		local maxTimeout = 45000
 		local currentTimeout = 0
 	
 		-- Save Each player
@@ -252,7 +252,7 @@ ESX.RegisterUsableItem = function(item, cb)
 end
 
 ESX.UseItem = function(source, item)
-	ESX.UsableItemsCallbacks[item](source)
+	ESX.UsableItemsCallbacks[item](source, item)
 end
 
 ESX.GetItemLabel = function(item)

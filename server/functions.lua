@@ -181,7 +181,7 @@ end
 
 ESX.SavePlayers = function(finishedCB)
     local playersToSave, savedPlayers = #ESX.Players, 0 
-    local currentTimeout, loop, maxTimeout = 0, 0, 45000
+    local currentTimeout, loop, maxTimeout = 0, 0, 25000
     Citizen.CreateThread(function()
         for _, xPlayer in ipairs(ESX.Players) do
             loop = loop + 1
@@ -190,7 +190,7 @@ ESX.SavePlayers = function(finishedCB)
                     savedPlayers = savedPlayers    + 1
                 end
             end)
-            if loop == 8 then Citizen.Wait(100) loop = 0 end
+            if loop == 10 then Citizen.Wait(500) currentTimeout = currentTimeout - 500 end
         end
     end)
     while true do

@@ -180,34 +180,30 @@ ESX.SavePlayer = function(xPlayer, cb)
 end
 
 ESX.SavePlayers = function(finishedCB)
-	CreateThread(function()
-		local savedPlayers = 0
-		local playersToSave = #ESX.Players
-		local maxTimeout = 45000
-		local currentTimeout = 0
-	
-		-- Save Each player
-		for _, xPlayer in ipairs(ESX.Players) do
-			ESX.SavePlayer(xPlayer, function(rowsChanged)
-				if rowsChanged == 1 then
-					savedPlayers = savedPlayers	+ 1
-				end
-			end)
-		end
-
-		-- Call the callback when done
-		while true do
-			Citizen.Wait(500)
-			currentTimeout = currentTimeout + 500
-			if playersToSave == savedPlayers then
-				finishedCB(true)
-				break
-			elseif currentTimeout >= maxTimeout then
-				finishedCB(false)
-				break
-			end
-		end
-	end)
+    local playersToSave, savedPlayers = #ESX.Players, 0 
+    local currentTimeout, loop, maxTimeout = 0, 0, 45000
+    Citizen.CreateThread(function()
+        for _, xPlayer in ipairs(ESX.Players) do
+            loop = loop + 1
+            ESX.SavePlayer(xPlayer, function(rowsChanged)
+                if rowsChanged == 1 then
+                    savedPlayers = savedPlayers    + 1
+                end
+            end)
+            if loop == 8 then Citizen.Wait(100) loop = 0 end
+        end
+    end)
+    while true do
+        Citizen.Wait(500)
+        if playersToSave == savedPlayers then
+            finishedCB(true)
+            break
+        elseif currentTimeout >= maxTimeout then
+            finishedCB(false)
+            break
+        end
+        currentTimeout = currentTimeout + 500
+    end
 end
 
 ESX.StartDBSync = function()

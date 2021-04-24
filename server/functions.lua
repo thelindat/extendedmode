@@ -164,46 +164,40 @@ ESX.TriggerServerCallback = function(name, requestId, source, cb, ...)
 end
 
 ESX.SavePlayer = function(xPlayer, cb)
-	if ExM.DatabaseType == "es+esx" then
-		-- Nothing yet ;)
-	elseif ExM.DatabaseType == "newesx" then
-		MySQL.Async.execute('UPDATE users SET accounts = @accounts, job = @job, job_grade = @job_grade, `group` = @group, position = @position, inventory = @inventory WHERE identifier = @identifier', {
-			['@accounts'] = json.encode(xPlayer.getAccounts(true)),
-			['@job'] = xPlayer.job.name,
-			['@job_grade'] = xPlayer.job.grade,
-			['@group'] = xPlayer.getGroup(),
-			['@position'] = json.encode(xPlayer.getCoords()),
-			['@identifier'] = xPlayer.getIdentifier(),
-			['@inventory'] = json.encode(xPlayer.getInventory(true))
-		}, cb)
-	end
+	exports.ghmattimysql:execute('UPDATE users SET accounts = @accounts, job = @job, job_grade = @job_grade, `group` = @group, position = @position, inventory = @inventory WHERE identifier = @identifier', {
+		['@accounts'] = json.encode(xPlayer.getAccounts(true)),
+		['@job'] = xPlayer.job.name,
+		['@job_grade'] = xPlayer.job.grade,
+		['@group'] = xPlayer.getGroup(),
+		['@position'] = json.encode(xPlayer.getCoords()),
+		['@identifier'] = xPlayer.getIdentifier(),
+		['@inventory'] = json.encode(xPlayer.getInventory(true))
+	}, cb)
 end
 
 ESX.SavePlayers = function(finishedCB)
-    local playersToSave, savedPlayers = #ESX.Players, 0 
-    local currentTimeout, loop, maxTimeout = 0, 0, 25000
     Citizen.CreateThread(function()
+		local playersToSave, savedPlayers = #ESX.Players, 0 
+		local currentTimeout, maxTimeout = 0, 25000
         for _, xPlayer in ipairs(ESX.Players) do
-            loop = loop + 1
             ESX.SavePlayer(xPlayer, function(rowsChanged)
-                if rowsChanged == 1 then
-                    savedPlayers = savedPlayers    + 1
+                if rowsChanged ~= 0 then
+                    savedPlayers = savedPlayers + 1
                 end
             end)
-            if loop == 10 then Citizen.Wait(500) currentTimeout = currentTimeout - 500 end
         end
+		while true do
+			Citizen.Wait(500)
+			if playersToSave == savedPlayers then
+				finishedCB(true)
+				break
+			elseif currentTimeout >= maxTimeout then
+				finishedCB(false)
+				break
+			end
+			currentTimeout = currentTimeout + 500
+		end
     end)
-    while true do
-        Citizen.Wait(500)
-        if playersToSave == savedPlayers then
-            finishedCB(true)
-            break
-        elseif currentTimeout >= maxTimeout then
-            finishedCB(false)
-            break
-        end
-        currentTimeout = currentTimeout + 500
-    end
 end
 
 ESX.StartDBSync = function()

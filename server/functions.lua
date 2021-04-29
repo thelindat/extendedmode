@@ -181,7 +181,7 @@ ESX.SavePlayers = function(finishedCB)
 		local currentTimeout, maxTimeout = 0, 25000
         for _, xPlayer in ipairs(ESX.Players) do
             ESX.SavePlayer(xPlayer, function(rowsChanged)
-                if rowsChanged ~= 0 then
+                if rowsChanged.affectedRows == 1 then
                     savedPlayers = savedPlayers + 1
                 end
             end)

@@ -47,7 +47,7 @@ ExM.DatabaseType = nil
 
 print('[ExtendedMode] [^2INFO^7] Starting up...')
 
-MySQL.ready(function()
+exports.ghmattimysql:ready(function()
 	print('[ExtendedMode] [^2INFO^7] Checking your database...')
 	
 	-- Check the information schema for the tables that match the esx ones
